@@ -2,28 +2,31 @@ import numpy as np
 
 
 class TFIDF:
-	def __init__(self, features):
-		self.features = features
+	def __init__(self, feature_manager):
+		"""
+
+		:type feature_manager: FeatureManager.FeatureManager
+		"""
+		self.features_manager = feature_manager
 		self.vocabulary = {}
 		self.word_index = 0
-		self.feature_start = self.features.number_of_features()
 
 	def update_tfidf(self, tokens):
 		self.__add_to_vocabulary(tokens)
 		tf_array = self.__create_document_vector(tokens)
-		self.features.add_column(self.__get_column_difference_matrix(tf_array))
-		self.features.add_row(tf_array)
+		self.features_manager.add_document(tf_array, self.__get_column_difference_matrix(tf_array))
 
 	def get_tfidf(self):
-		if sum(self.features.get()[0, :]) == 0:
-			self.features.remove_first_row()
-		tf = self.features.get() / self.features.get().sum(axis=1)
-		non_zeros = self.features.get() != 0
-		idf = self.features.number_of_documents() / non_zeros.sum(axis=0)
+		self.features_manager.clean_features()
+		features = self.features_manager.get_features()
+		tf = features / features.sum(axis=1)
+		number_of_documents, _ = self.features_manager.feature_dimensions()
+		idf = number_of_documents / (features != 0).sum(axis=0)
 		return np.multiply(tf, idf)
 
 	def __get_column_difference_matrix(self, tf_array):
-		return np.zeros((self.features.number_of_documents(), len(tf_array) - self.features.number_of_features()))
+		number_of_documents, number_of_features = self.features_manager.feature_dimensions()
+		return np.zeros((number_of_documents, len(tf_array) - number_of_features))
 
 	def __create_document_vector(self, words):
 		local_dictionary = {}
