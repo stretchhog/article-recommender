@@ -4,7 +4,7 @@ import nltk
 from nltk.corpus import stopwords
 
 
-class Tokenization:
+class Tokenization(object):
 	stop = stopwords.words('english')
 
 	def __init__(self, document):
@@ -34,8 +34,8 @@ class Tokenization:
 	def __remove_short_words(self, sentences):
 		return [[token for token in sentence if len(token[0]) >= self.minimum_word_length] for sentence in sentences]
 
-	def flatten_sentences(sentences):
+	def flatten_sentences(self, sentences):
 		return list(itertools.chain.from_iterable(sentences))
 
-	def remove_pos_tags(tokens):
+	def remove_pos_tags(self, tokens):
 		return [token[0] for token in tokens]
