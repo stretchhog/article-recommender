@@ -4,9 +4,9 @@ import abc
 
 class Model(object):
 	@abc.abstractmethod
-	def train(self, document):
+	def train(self, x, y):
 		return
 
 	@abc.abstractmethod
-	def score(self, document):
+	def score(self, x):
 		return
