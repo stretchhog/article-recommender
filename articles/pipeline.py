@@ -13,12 +13,13 @@ class Pipeline(object):
 		self.tfidf = TFIDF(self.feature_manager)
 		self.tokenization = Tokenization()
 		self.ensemble = Ensemble()
-		self.ensemble.register(NaiveBayes(self.feature_manager))
+		self.ensemble.register(NaiveBayes())
 		self.cache = []
 
 	def score(self, document):
-		features = self.tokenization.tokenize(document)
-		return self.ensemble.score(x, new)
+		tokens = self.tokenization.tokenize(document)
+		features = self.tfidf.single_doc_tfidf(tokens)
+		return self.ensemble.score(features)
 
 	def train(self, document):
 		self.cache.append(document)
@@ -27,3 +28,7 @@ class Pipeline(object):
 				tokens = self.tokenization.tokenize(doc)
 				self.tfidf.update_tfidf(tokens)
 		self.ensemble.train(self.feature_manager.get_x(), self.feature_manager.get_y())
+
+
+pipeline = Pipeline()
+pipeline.train()

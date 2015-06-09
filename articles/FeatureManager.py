@@ -34,9 +34,6 @@ class FeatureManager(object):
 		if sum(self.features.x[0, :]) == 0:
 			self.features.remove_first_row()
 
-	def get_features(self):
-		return self.features
-
 	def get_x(self):
 		return self.features.x
 

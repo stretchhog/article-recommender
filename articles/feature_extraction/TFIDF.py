@@ -18,17 +18,26 @@ class TFIDF(object):
 
 	def get_tfidf(self):
 		self.feature_manager.clean_features()
-		features = self.feature_manager.get_features(self)
+		features = self.feature_manager.get_x()
 		tf = features / features.sum(axis=1)
+		idf = self.__calculate_idf(features)
+		return np.multiply(tf, idf)
+
+	def __calculate_idf(self, features):
 		number_of_documents, _ = self.feature_manager.feature_dimensions()
-		idf = number_of_documents / (features != 0).sum(axis=0)
+		idf = np.log10(number_of_documents / (features != 0).sum(axis=0))
+		return idf
+
+	def single_doc_tfidf(self, tokens):
+		tf = self.__create_document_vector(tokens, True)
+		idf = self.__calculate_idf(self.feature_manager.get_x())
 		return np.multiply(tf, idf)
 
 	def __get_column_difference_matrix(self, tf_array):
 		number_of_documents, number_of_features = self.feature_manager.feature_dimensions()
 		return np.zeros((number_of_documents, len(tf_array) - number_of_features))
 
-	def __create_document_vector(self, words):
+	def __create_document_vector(self, words, fill_with_none=False):
 		local_dictionary = {}
 		tf_array = np.zeros(len(self.vocabulary))
 
@@ -37,7 +46,11 @@ class TFIDF(object):
 				local_dictionary[word] += 1
 			else:
 				local_dictionary[word] = 1
-			tf_array[self.vocabulary[word]] = local_dictionary[word]
+			if word in self.vocabulary:
+				tf_array[self.vocabulary[word]] = local_dictionary[word]
+
+		if fill_with_none:
+			tf_array = [(tf if tf is not 0 else None) for tf in tf_array]
 		return tf_array
 
 	def __add_to_vocabulary(self, words):

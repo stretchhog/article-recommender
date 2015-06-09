@@ -19,6 +19,8 @@ class NaiveBayes(Model):
 	def score(self, x):
 		prob_neg, prob_pos = self.get_priors()
 		for i in range(1, len(x)):
+			if x[i] is None:
+				continue
 			index = np.searchsorted(self.bins[i], x[i])
 			pos, neg = self.labels_for_range(self.edges[index], self.edges[index + 1] if index < len(self.edges) else None)
 			prob_pos *= pos / (pos + neg)
