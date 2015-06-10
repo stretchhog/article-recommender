@@ -58,3 +58,6 @@ The woman, who has asked to remain anonymous, was diagnosed with sickle cell ana
 pipeline = Pipeline()
 pipeline.train(text1, True)
 pipeline.train(text2, True)
+
+text3 = "woman in belgium is the first in the world to give birth to a baby using transplanted ovarian tissue frozen"
+pipeline.score(text3)

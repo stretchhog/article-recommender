@@ -28,7 +28,7 @@ class TFIDF(object):
 		return idf
 
 	def single_doc_tfidf(self, tokens):
-		tf = self.__create_document_vector(tokens, True)
+		tf = self.__create_document_vector(tokens)
 		idf = self.__calculate_idf(self.feature_manager.get_x())
 		return np.multiply(tf, idf)
 
@@ -36,7 +36,7 @@ class TFIDF(object):
 		number_of_documents, number_of_features = self.feature_manager.feature_dimensions()
 		return np.zeros((number_of_documents, tf_array.shape[1] - number_of_features))
 
-	def __create_document_vector(self, words, fill_with_none=False):
+	def __create_document_vector(self, words):
 		local_dictionary = {}
 		tf_array = np.zeros((1, len(self.vocabulary)))
 
@@ -48,8 +48,6 @@ class TFIDF(object):
 			if word in self.vocabulary:
 				tf_array[0, self.vocabulary[word]] = local_dictionary[word]
 
-		if fill_with_none:
-			tf_array = [(tf if tf is not 0 else None) for tf in tf_array]
 		return tf_array
 
 	def __add_to_vocabulary(self, words):

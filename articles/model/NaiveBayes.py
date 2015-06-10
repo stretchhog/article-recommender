@@ -1,3 +1,4 @@
+from __future__ import division
 import numpy as np
 from articles.model.Model import Model
 
@@ -6,23 +7,22 @@ __author__ = 'Stretchhog'
 
 class NaiveBayes(Model):
 	def __init__(self):
-		self.bins = []
-		self.edges = []
+		self.data_cache = []
 		self.y = []
 		self.x = []
 
 	def train(self, x, y):
-		self.bins, self.edges = [np.histogram(column, 100) for column in x.T]
+		self.data_cache = [np.histogram(column, 100) for column in x.T]
 		self.y = y
 		self.x = x
 
 	def score(self, x):
 		prob_neg, prob_pos = self.get_priors()
-		for i in range(1, len(x)):
-			if x[i] is None:
+		for i in range(1, x.shape[1]):
+			if x[0, i] == 0.:
 				continue
-			index = np.searchsorted(self.bins[i], x[i])
-			pos, neg = self.labels_for_range(self.edges[index], self.edges[index + 1] if index < len(self.edges) else None)
+			index = np.searchsorted(self.data_cache[i][0], x[0, i])
+			pos, neg = self.labels_for_range(self.x[:, i], self.data_cache[i][1][index], self.data_cache[i][1][index + 1] if index < len( self.data_cache[i][1]) else None)
 			prob_pos *= pos / (pos + neg)
 			prob_neg *= neg / (pos + neg)
 
@@ -34,12 +34,12 @@ class NaiveBayes(Model):
 		all_neg = total - all_pos
 		return (all_neg / total), (all_pos / total)
 
-	def labels_for_range(self, lo, hi):
+	def labels_for_range(self, data, lo, hi):
 		if hi is not None:
-			documents_in_range = lo < self.x <= hi
+			documents_in_range = np.logical_and(lo < data, data <= hi)
 		else:
 			documents_in_range = lo < self.x
 
 		pos = np.count_nonzero(self.y[documents_in_range])
-		neg = pos - self.x.shape[0]
+		neg = data.shape[0] - pos
 		return pos, neg
