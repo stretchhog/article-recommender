@@ -1,5 +1,6 @@
-from utils import editdistance
 import unittest
+
+from recommender.utils import editdistance
 
 
 class TestLevenshtein(unittest.TestCase):

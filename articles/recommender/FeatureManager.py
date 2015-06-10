@@ -1,5 +1,6 @@
 import numpy as np
-from Features import Features
+
+from recommender import Features
 
 __author__ = 'tvancann'
 

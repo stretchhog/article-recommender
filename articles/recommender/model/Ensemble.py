@@ -1,5 +1,6 @@
 from enum import Enum
-from articles.model.Model import Model
+
+from recommender.model import Model
 
 __author__ = 'Stretchhog'
 

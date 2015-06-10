@@ -1,5 +1,5 @@
-from FeatureManager import FeatureManager
-from feature_extraction.TFIDF import TFIDF
+from recommender import FeatureManager
+from recommender.feature_extraction import TFIDF
 
 __author__ = 'tvancann'
 

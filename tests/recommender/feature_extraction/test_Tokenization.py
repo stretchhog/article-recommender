@@ -1,5 +1,6 @@
 import unittest
-from articles.feature_extraction import Tokenization
+
+from recommender.feature_extraction import Tokenization
 
 
 class TestTokenization(unittest.TestCase):

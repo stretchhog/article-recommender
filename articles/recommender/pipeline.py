@@ -1,9 +1,9 @@
-from articles.FeatureManager import FeatureManager
-from articles.feature_extraction.TFIDF import TFIDF
-from articles.feature_extraction.Tokenization import Tokenization
-from articles.model.Ensemble import Ensemble, Mode
-from articles.model.NaiveBayes import NaiveBayes
-from articles.model.SupportVectorMachines import SupportVectorMachines
+from recommender import FeatureManager
+from recommender.feature_extraction import TFIDF
+from recommender.feature_extraction import Tokenization
+from recommender.model import Ensemble, Mode
+from recommender.model import NaiveBayes
+from recommender.model import SupportVectorMachines
 
 __author__ = 'Stretchhog'
 
