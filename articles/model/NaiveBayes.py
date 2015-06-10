@@ -8,8 +8,8 @@ class NaiveBayes(Model):
 	def __init__(self):
 		self.bins = []
 		self.edges = []
-		self.y = np.ndarray()
-		self.x = np.ndarray()
+		self.y = []
+		self.x = []
 
 	def train(self, x, y):
 		self.bins, self.edges = [np.histogram(column, 100) for column in x.T]

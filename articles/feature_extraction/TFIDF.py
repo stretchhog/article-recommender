@@ -17,9 +17,8 @@ class TFIDF(object):
 		self.feature_manager.add_document(tf_array, self.__get_column_difference_matrix(tf_array))
 
 	def get_tfidf(self):
-		self.feature_manager.clean_features()
 		features = self.feature_manager.get_x()
-		tf = features / features.sum(axis=1)
+		tf = features / features.sum(axis=0)
 		idf = self.__calculate_idf(features)
 		return np.multiply(tf, idf)
 
@@ -35,11 +34,11 @@ class TFIDF(object):
 
 	def __get_column_difference_matrix(self, tf_array):
 		number_of_documents, number_of_features = self.feature_manager.feature_dimensions()
-		return np.zeros((number_of_documents, len(tf_array) - number_of_features))
+		return np.zeros((number_of_documents, tf_array.shape[1] - number_of_features))
 
 	def __create_document_vector(self, words, fill_with_none=False):
 		local_dictionary = {}
-		tf_array = np.zeros(len(self.vocabulary))
+		tf_array = np.zeros((1, len(self.vocabulary)))
 
 		for word in words:
 			if word in local_dictionary:
@@ -47,7 +46,7 @@ class TFIDF(object):
 			else:
 				local_dictionary[word] = 1
 			if word in self.vocabulary:
-				tf_array[self.vocabulary[word]] = local_dictionary[word]
+				tf_array[0, self.vocabulary[word]] = local_dictionary[word]
 
 		if fill_with_none:
 			tf_array = [(tf if tf is not 0 else None) for tf in tf_array]
@@ -55,6 +54,7 @@ class TFIDF(object):
 
 	def __add_to_vocabulary(self, words):
 		new_words = filter(lambda word: word not in self.vocabulary, words)
-		for new_word in new_words:
+		uniques = set(new_words)
+		for new_word in uniques:
 			self.vocabulary[new_word] = self.word_index
 			self.word_index += 1

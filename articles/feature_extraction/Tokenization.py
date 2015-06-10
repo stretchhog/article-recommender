@@ -16,8 +16,8 @@ class Tokenization(object):
 		sentences = self.__pos_tagging(sentences)
 		sentences = self.__remove_stopwords(sentences)
 		sentences = self.__remove_short_words(sentences)
-		flat = self.flatten_sentences(sentences)
-		tokens = self.remove_pos_tags(flat)
+		flat = self.__flatten_sentences(sentences)
+		tokens = self.__remove_pos_tags(flat)
 		return tokens
 
 	def __split_sentences(self, document):
