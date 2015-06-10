@@ -1,6 +1,6 @@
 import numpy as np
 
-from recommender.model import Model
+from recommender.model.Model import Model
 
 __author__ = 'Stretchhog'
 

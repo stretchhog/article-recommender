@@ -1,6 +1,6 @@
 from sklearn import svm
 
-from recommender.model import Model
+from recommender.model.Model import Model
 
 __author__ = 'Stretchhog'
 
