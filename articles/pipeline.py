@@ -56,8 +56,9 @@ Bone marrow transplant
 The woman, who has asked to remain anonymous, was diagnosed with sickle cell anaemia at the age of five."""
 
 pipeline = Pipeline()
-pipeline.train(text1, True)
+pipeline.train(text1, False)
 pipeline.train(text2, True)
 
 text3 = "woman in belgium is the first in the world to give birth to a baby using transplanted ovarian tissue frozen"
-pipeline.score(text3)
+score = pipeline.score(text3)
+print(score)

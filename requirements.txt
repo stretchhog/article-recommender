@@ -1,6 +1,2 @@
 numpy
-requests
-BeautifulSoup4
 nltk
-jedi
-wheel
