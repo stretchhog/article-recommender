@@ -1,2 +1,6 @@
-numpy
 nltk
+numpy
+scipy
+scikit-learn
+matplotlib
+enum34

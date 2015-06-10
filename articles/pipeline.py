@@ -1,8 +1,9 @@
 from articles.FeatureManager import FeatureManager
 from articles.feature_extraction.TFIDF import TFIDF
 from articles.feature_extraction.Tokenization import Tokenization
-from articles.model.Ensemble import Ensemble
+from articles.model.Ensemble import Ensemble, Mode
 from articles.model.NaiveBayes import NaiveBayes
+from articles.model.SupportVectorMachines import SupportVectorMachines
 
 __author__ = 'Stretchhog'
 
@@ -12,9 +13,8 @@ class Pipeline(object):
 		self.feature_manager = FeatureManager()
 		self.tfidf = TFIDF(self.feature_manager)
 		self.tokenization = Tokenization()
-		self.ensemble = Ensemble()
-		self.ensemble.register(NaiveBayes())
-		self.cache = []
+		self.ensemble = Ensemble(Mode.GLOBAL_AVG, [NaiveBayes(), SupportVectorMachines()])
+		self.document_cache = []
 
 	def score(self, document):
 		tokens = self.tokenization.tokenize(document)
@@ -22,9 +22,9 @@ class Pipeline(object):
 		return self.ensemble.score(features)
 
 	def train(self, document, label):
-		self.cache.append((document, label))
-		if len(self.cache) >= 2:
-			for doc, label in self.cache:
+		self.document_cache.append((document, label))
+		if len(self.document_cache) >= 2:
+			for doc, label in self.document_cache:
 				self.update_knowledge(doc, label)
 			self.ensemble.train(self.tfidf.get_tfidf(), self.feature_manager.get_y())
 
