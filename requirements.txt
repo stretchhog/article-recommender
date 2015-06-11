@@ -1,9 +1,18 @@
+# machine learning
 nltk
 numpy
 scipy
 scikit-learn
 matplotlib
+
+# util
 enum34
+
+# server
 cherrypy
 flask
 paste
+
+# persistence
+pymongo
+mongoengine
