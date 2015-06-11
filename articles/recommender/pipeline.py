@@ -16,6 +16,7 @@ class Pipeline(object):
 		self.tokenization = Tokenization()
 		self.ensemble = Ensemble(Mode.GLOBAL_AVG, [NaiveBayes(), SupportVectorMachines()])
 		self.document_cache = []
+		self.db = Database()
 
 	def score(self, document):
 		tokens = self.tokenization.tokenize(document)
@@ -28,12 +29,30 @@ class Pipeline(object):
 			for doc, label in self.document_cache:
 				self.update_knowledge(doc, label)
 			self.ensemble.train(self.tfidf.get_tfidf(), self.feature_manager.get_y())
-		self.ensemble.persist()
+			self.persist()
 
 	def update_knowledge(self, doc, label):
 		tokens = self.tokenization.tokenize(doc)
 		self.tfidf.update_tfidf(tokens)
 		self.feature_manager.add_label(label)
+
+	def persist(self):
+		name = "foo"
+		data = {
+			"name": name,
+			"tfidf": {
+				"vocabulary": self.tfidf.vocabulary,
+				"word_index": self.tfidf.word_index
+			},
+			"features_manager": {
+				"x": self.feature_manager.get_x(),
+				"y": self.feature_manager.get_y()
+			}
+		}
+		self.db.save(name, data)
+
+	def restore(self, name):
+		loaded = self.db.load(name)
 
 
 text1 = """The remains of 44 victims of the Germanwings plane crash have arrived in Duesseldorf, where they will be returned to families for burial.
