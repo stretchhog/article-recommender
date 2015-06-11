@@ -12,15 +12,13 @@ class Database(object):
 		self.models = db['models']
 		self.models.delete_many({"type": "NaiveBayes"})
 
-	def save_model(self, model):
+	def save_model(self, model, model_type):
 		new_model = {
-			"type": type(model),
-			"model": model.get_model()
+			"type": model_type,
+			"model": model,
 			"date": datetime.datetime.utcnow()
 		}
-		return self.models.insert_one(new_model).inserted_id
+		return self.models.find_one_and_replace({"type": type}, new_model).inserted_id
 
-found_models = models.find({"type": "NaiveBayes"})
-
-for model in found_models:
-	print(model)
+	def load_model(self, model_type):
+		return self.models.find_one({"type": model_type})
