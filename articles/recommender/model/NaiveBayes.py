@@ -43,3 +43,6 @@ class NaiveBayes(Model):
 		pos = np.count_nonzero(self.y[documents_in_range])
 		neg = data.shape[0] - pos
 		return pos, neg
+
+	def get_model(self):
+		return self.data_cache

@@ -5,18 +5,20 @@ __author__ = 'Stretchhog'
 
 client = MongoClient()
 
-db = client['recommender-db']
-models = db['models']
 
-models.delete_many({"type": "NaiveBayes"})
+class Database(object):
+	def __init__(self):
+		db = client['recommender-db']
+		self.models = db['models']
+		self.models.delete_many({"type": "NaiveBayes"})
 
-new_model = {"type": "NaiveBayes",
-             "model": "model",
-             "data": datetime.datetime.utcnow()
-             }
-
-new_model_id = models.insert_one(new_model).inserted_id
-print(new_model_id)
+	def save_model(self, model):
+		new_model = {
+			"type": type(model),
+			"model": model.get_model()
+			"date": datetime.datetime.utcnow()
+		}
+		return self.models.insert_one(new_model).inserted_id
 
 found_models = models.find({"type": "NaiveBayes"})
 
