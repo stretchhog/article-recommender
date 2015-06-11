@@ -15,5 +15,5 @@ class SupportVectorMachines(Model):
 	def train(self, x, y):
 		self.model = self.model.fit(x, y)
 
-	def get_model(self):
-		return self.model
+	def get_type(self):
+		return "SVM"

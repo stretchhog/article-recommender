@@ -4,6 +4,7 @@ from recommender.feature_extraction.Tokenization import Tokenization
 from recommender.model.Ensemble import Ensemble, Mode
 from recommender.model.NaiveBayes import NaiveBayes
 from recommender.model.SupportVectorMachines import SupportVectorMachines
+from recommender.persistence.database import Database
 
 __author__ = 'Stretchhog'
 
@@ -27,6 +28,7 @@ class Pipeline(object):
 			for doc, label in self.document_cache:
 				self.update_knowledge(doc, label)
 			self.ensemble.train(self.tfidf.get_tfidf(), self.feature_manager.get_y())
+		self.ensemble.persist()
 
 	def update_knowledge(self, doc, label):
 		tokens = self.tokenization.tokenize(doc)

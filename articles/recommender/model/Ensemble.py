@@ -1,26 +1,19 @@
 from enum import Enum
 
 from recommender.model.Model import Model
+from recommender.persistence.database import Database
 
 __author__ = 'Stretchhog'
 
 
 class Ensemble(Model):
 	def __init__(self, mode, models):
-		self.models = list()
 		if mode is Mode.MAJORITY_AVG and len(models) % 2 == 0:
 			raise AttributeError('An even number of models cannot always reach a majority vote!')
 
 		self.mode = mode
-		for model in models:
-			self.__register(model)
-
-	def __register(self, model):
-		"""
-
-		:type model: Model
-		"""
-		self.models.append(model)
+		self.models = models()
+		self.db = Database()
 
 	def train(self, x, y):
 		for model in self.models:
@@ -37,6 +30,10 @@ class Ensemble(Model):
 		elif self.mode is Mode.GLOBAL_AVG:
 			likelihood = sum(scores) / len(scores)
 		return likelihood
+
+	def persist(self):
+		for model in self.models:
+			self.db.save_model(model)
 
 
 class Mode(Enum):

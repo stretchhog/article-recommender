@@ -12,9 +12,9 @@ class Database(object):
 		self.models = db['models']
 		self.models.delete_many({"type": "NaiveBayes"})
 
-	def save_model(self, model, model_type):
+	def save_model(self, model):
 		new_model = {
-			"type": model_type,
+			"type": model.get_type(),
 			"model": model,
 			"date": datetime.datetime.utcnow()
 		}

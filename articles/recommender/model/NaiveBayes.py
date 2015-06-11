@@ -44,5 +44,5 @@ class NaiveBayes(Model):
 		neg = data.shape[0] - pos
 		return pos, neg
 
-	def get_model(self):
-		return self.data_cache
+	def get_type(self):
+		return "NaiveBayes"

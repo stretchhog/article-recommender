@@ -12,5 +12,6 @@ class Model(object):
 		return
 
 	@abc.abstractmethod
-	def get_model(self):
+	def get_type(self):
 		return
+
