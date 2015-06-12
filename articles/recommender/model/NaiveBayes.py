@@ -17,24 +17,24 @@ class NaiveBayes(Model):
 		self.x = x
 
 	def score(self, x):
-		prob_neg, prob_pos = self.get_priors()
+		prob_neg, prob_pos = self.__get_priors()
 		for i in range(1, x.shape[1]):
 			if x[0, i] == 0.:
 				continue
 			index = np.searchsorted(self.data_cache[i][0], x[0, i])
-			pos, neg = self.labels_for_range(self.x[:, i], self.data_cache[i][1][index], self.data_cache[i][1][index + 1] if index < len( self.data_cache[i][1]) else None)
+			pos, neg = self.__labels_for_range(self.x[:, i], self.data_cache[i][1][index], self.data_cache[i][1][index + 1] if index < len( self.data_cache[i][1]) else None)
 			prob_pos *= pos / (pos + neg)
 			prob_neg *= neg / (pos + neg)
 
 		return prob_pos / (prob_neg + prob_pos)
 
-	def get_priors(self):
+	def __get_priors(self):
 		total = len(self.y)
 		all_pos = np.count_nonzero(self.y)
 		all_neg = total - all_pos
 		return (all_neg / total), (all_pos / total)
 
-	def labels_for_range(self, data, lo, hi):
+	def __labels_for_range(self, data, lo, hi):
 		if hi is not None:
 			documents_in_range = np.logical_and(lo < data, data <= hi)
 		else:

@@ -18,15 +18,15 @@ class TFIDF(object):
 		idf = self.__calculate_idf(features)
 		return np.multiply(tf, idf)
 
-	def __calculate_idf(self, features):
-		number_of_documents, _ = self.feature_manager.feature_dimensions()
-		idf = np.log10(number_of_documents / (features != 0).sum(axis=0))
-		return idf
-
 	def single_doc_tfidf(self, tokens):
 		tf = self.__create_document_vector(tokens)
 		idf = self.__calculate_idf(self.feature_manager.features.x)
 		return np.multiply(tf, idf)
+
+	def __calculate_idf(self, features):
+		number_of_documents, _ = self.feature_manager.feature_dimensions()
+		idf = np.log10(number_of_documents / (features != 0).sum(axis=0))
+		return idf
 
 	def __get_column_difference_matrix(self, tf_array):
 		number_of_documents, number_of_features = self.feature_manager.feature_dimensions()
