@@ -3,10 +3,6 @@ import numpy as np
 
 class TFIDF(object):
 	def __init__(self, feature_manager):
-		"""
-
-		:type feature_manager: FeatureManager.FeatureManager
-		"""
 		self.feature_manager = feature_manager
 		self.vocabulary = {}
 		self.word_index = 0
@@ -17,7 +13,7 @@ class TFIDF(object):
 		self.feature_manager.add_document(tf_array, self.__get_column_difference_matrix(tf_array))
 
 	def get_tfidf(self):
-		features = self.feature_manager.get_x()
+		features = self.feature_manager.features.x
 		tf = features / features.sum(axis=0)
 		idf = self.__calculate_idf(features)
 		return np.multiply(tf, idf)
@@ -29,7 +25,7 @@ class TFIDF(object):
 
 	def single_doc_tfidf(self, tokens):
 		tf = self.__create_document_vector(tokens)
-		idf = self.__calculate_idf(self.feature_manager.get_x())
+		idf = self.__calculate_idf(self.feature_manager.features.x)
 		return np.multiply(tf, idf)
 
 	def __get_column_difference_matrix(self, tf_array):

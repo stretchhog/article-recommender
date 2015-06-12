@@ -6,6 +6,9 @@ __author__ = 'Stretchhog'
 
 
 class Ensemble(Model):
+	def get_type(self):
+		raise NotImplementedError("ensemble does not have a type")
+
 	def __init__(self, mode, models):
 		if mode is Mode.MAJORITY_AVG and len(models) % 2 == 0:
 			raise AttributeError('An even number of models cannot always reach a majority vote!')

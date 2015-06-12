@@ -12,10 +12,11 @@ class Features(object):
 		self.x = np.delete(self.x, 0, 0)
 
 	def add_row(self, row):
-		if self.first_row:
+		if self.x.shape == (1, 1):
 			self.x = row
 			self.first_row = False
 		else:
+			self.first_row = False
 			self.x = np.vstack((self.x, row))
 
 	def add_column(self, column):

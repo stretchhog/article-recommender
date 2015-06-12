@@ -4,19 +4,20 @@ from recommender.feature_extraction.Tokenization import Tokenization
 from recommender.model.Ensemble import Ensemble, Mode
 from recommender.model.NaiveBayes import NaiveBayes
 from recommender.model.SupportVectorMachines import SupportVectorMachines
-from recommender.persistence.database import Database
+from recommender.persistence.PickleDS import PickleDS
 
 __author__ = 'Stretchhog'
 
 
 class Pipeline(object):
-	def __init__(self):
+	def __init__(self, ds):
 		self.feature_manager = FeatureManager()
 		self.tfidf = TFIDF(self.feature_manager)
 		self.tokenization = Tokenization()
 		self.ensemble = Ensemble(Mode.GLOBAL_AVG, [NaiveBayes(), SupportVectorMachines()])
 		self.document_cache = []
-		self.db = Database()
+		self.ds = ds
+		self.restore("foo")
 
 	def score(self, document):
 		tokens = self.tokenization.tokenize(document)
@@ -28,7 +29,7 @@ class Pipeline(object):
 		if len(self.document_cache) >= 2:
 			for doc, label in self.document_cache:
 				self.update_knowledge(doc, label)
-			self.ensemble.train(self.tfidf.get_tfidf(), self.feature_manager.get_y())
+			self.ensemble.train(self.tfidf.get_tfidf(), self.feature_manager.y)
 			self.persist()
 
 	def update_knowledge(self, doc, label):
@@ -44,15 +45,20 @@ class Pipeline(object):
 				"vocabulary": self.tfidf.vocabulary,
 				"word_index": self.tfidf.word_index
 			},
-			"features_manager": {
-				"x": self.feature_manager.get_x(),
-				"y": self.feature_manager.get_y()
+			"feature_manager": {
+				"x": self.feature_manager.features.x,
+				"y": self.feature_manager.y
 			}
 		}
-		self.db.save(name, data)
+		self.ds.save(name, data)
 
 	def restore(self, name):
-		loaded = self.db.load(name)
+		data = self.ds.load(name)
+		if data is not None:
+			self.feature_manager.features.x = data['feature_manager']['x']
+			self.feature_manager.y = data['feature_manager']['y']
+			self.tfidf.vocabulary = data['tfidf']['vocabulary']
+			self.tfidf.word_index = data['tfidf']['word_index']
 
 
 text1 = """The remains of 44 victims of the Germanwings plane crash have arrived in Duesseldorf, where they will be returned to families for burial.
@@ -76,7 +82,7 @@ The woman gave birth to a healthy boy in November 2014, and details of the case 
 Bone marrow transplant
 The woman, who has asked to remain anonymous, was diagnosed with sickle cell anaemia at the age of five."""
 
-pipeline = Pipeline()
+pipeline = Pipeline(PickleDS())
 pipeline.train(text1, False)
 pipeline.train(text2, True)
 

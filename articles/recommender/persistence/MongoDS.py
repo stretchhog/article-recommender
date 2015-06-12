@@ -1,13 +1,14 @@
 import datetime
 import subprocess
 from pymongo import MongoClient
+from recommender.persistence.DataStore import DataStore
 
 __author__ = 'Stretchhog'
 
 client = MongoClient()
 
 
-class Database(object):
+class Database(DataStore):
 	def __init__(self):
 		subprocess.Popen(['C:/tools/mongodb/bin/mongod'])
 		# subprocess.Popen(['C:/tools/mongodb/bin/mongod', '----dbpath C:\\dropbox\\projects\\mongodb'])

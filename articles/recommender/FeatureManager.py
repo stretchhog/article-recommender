@@ -19,12 +19,5 @@ class FeatureManager(object):
 	def feature_dimensions(self):
 		return self.features.number_of_documents(), self.features.number_of_features()
 
-	def get_x(self):
-		return self.features.x
-
-	def get_y(self):
-		return self.y
-
 	def add_label(self, label):
 		self.y = np.hstack((self.y, label))
-
