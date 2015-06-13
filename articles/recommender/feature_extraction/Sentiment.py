@@ -2,9 +2,8 @@ __author__ = 'Stretchhog'
 
 
 class Sentiment:
-	def __init__(self, feature_manager):
-		"""
+	def __init__(self):
+		pass
 
-		:type feature_manager: FeatureManager
-		"""
-		self.feature_manager = feature_manager
+	def get_sentiment(self, document):
+		return 0

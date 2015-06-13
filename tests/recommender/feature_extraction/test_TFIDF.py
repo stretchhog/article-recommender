@@ -1,4 +1,4 @@
-from recommender import FeatureManager
+from recommender.features import FeatureManager
 from recommender.feature_extraction import TFIDF
 
 __author__ = 'tvancann'

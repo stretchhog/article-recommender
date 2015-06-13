@@ -1,6 +1,4 @@
-from recommender.FeatureManager import FeatureManager
-from recommender.feature_extraction.TFIDF import TFIDF
-from recommender.feature_extraction.Tokenization import Tokenization
+from recommender.features.FeatureManager import FeatureManager
 from recommender.model.Ensemble import Ensemble, Mode
 from recommender.model.NaiveBayes import NaiveBayes
 from recommender.model.SupportVectorMachines import SupportVectorMachines
@@ -12,8 +10,6 @@ __author__ = 'Stretchhog'
 class Pipeline(object):
 	def __init__(self, ds):
 		self.feature_manager = FeatureManager()
-		self.tfidf = TFIDF(self.feature_manager)
-		self.tokenization = Tokenization()
 		self.ensemble = Ensemble(Mode.GLOBAL_AVG, [NaiveBayes(), SupportVectorMachines()])
 		self.document_cache = []
 		self.ds = ds
@@ -33,32 +29,17 @@ class Pipeline(object):
 			self.persist()
 
 	def update_knowledge(self, doc, label):
-		tokens = self.tokenization.tokenize(doc)
-		self.tfidf.update_tfidf(tokens)
-		self.feature_manager.add_label(label)
+		self.feature_manager.add_document(doc, label)
 
 	def persist(self):
 		name = "foo"
-		data = {
-			"name": name,
-			"tfidf": {
-				"vocabulary": self.tfidf.vocabulary,
-				"word_index": self.tfidf.word_index
-			},
-			"feature_manager": {
-				"x": self.feature_manager.features.x,
-				"y": self.feature_manager.y
-			}
-		}
+		data = self.feature_manager.get_for_persistence()
 		self.ds.save(name, data)
 
 	def restore(self, name):
 		data = self.ds.load(name)
 		if data is not None:
-			self.feature_manager.features.x = data['feature_manager']['x']
-			self.feature_manager.y = data['feature_manager']['y']
-			self.tfidf.vocabulary = data['tfidf']['vocabulary']
-			self.tfidf.word_index = data['tfidf']['word_index']
+			self.feature_manager.restore(data['feature_manager'])
 
 
 text1 = """The remains of 44 victims of the Germanwings plane crash have arrived in Duesseldorf, where they will be returned to families for burial.
