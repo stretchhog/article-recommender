@@ -1,4 +1,5 @@
 from enum import Enum
+from recommender.features.FeatureManager import ArticleFeature
 
 from recommender.model.Model import Model
 

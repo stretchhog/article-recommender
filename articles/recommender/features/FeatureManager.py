@@ -14,11 +14,11 @@ class FeatureManager(object):
 		self.y = []
 
 	def add_document(self, data, label):
-		self.x[ArticleFeature.TOPIC[0]].append(data[ArticleFeature.TOPIC[1]])
-		self.x[ArticleFeature.ORIGIN[0]].append(data[ArticleFeature.ORIGIN[1]])
-		self.x[ArticleFeature.WRITER[0]].append(data[ArticleFeature.WRITER[1]])
-		document = data['document']
-		self.x[ArticleFeature.SENTIMENT[0]].append(self.sentiment.get_sentiment(document))
+		self.x[ArticleFeature.TOPIC.value[0]].append(data[ArticleFeature.TOPIC.value[1]])
+		self.x[ArticleFeature.ORIGIN.value[0]].append(data[ArticleFeature.ORIGIN.value[1]])
+		self.x[ArticleFeature.AUTHOR.value[0]].append(data[ArticleFeature.AUTHOR.value[1]])
+		document = data['article']
+		self.x[ArticleFeature.SENTIMENT.value[0]].append(self.sentiment.get_sentiment(document))
 		self.tfidf.update_tfidf(document)
 		self.y = np.hstack((self.y, label))
 
@@ -27,13 +27,13 @@ class FeatureManager(object):
 		return self.x, self.y
 
 	def gather_features(self):
-		self.x[ArticleFeature.TFIDF[0]] = self.tfidf.get_tfidf()
+		self.x[ArticleFeature.TFIDF.value[0]] = self.tfidf.get_tfidf()
 
 	def restore(self, data):
-		self.x[ArticleFeature.TOPIC[0]] = data[ArticleFeature.TOPIC[1]]
-		self.x[ArticleFeature.ORIGIN[0]] = data[ArticleFeature.ORIGIN[1]]
-		self.x[ArticleFeature.WRITER[0]] = data[ArticleFeature.WRITER[1]]
-		self.x[ArticleFeature.SENTIMENT[0]] = data[ArticleFeature.SENTIMENT[1]]
+		self.x[ArticleFeature.TOPIC.value[0]] = data[ArticleFeature.TOPIC.value[1]]
+		self.x[ArticleFeature.ORIGIN.value[0]] = data[ArticleFeature.ORIGIN.value[1]]
+		self.x[ArticleFeature.AUTHOR.value[0]] = data[ArticleFeature.AUTHOR.value[1]]
+		self.x[ArticleFeature.SENTIMENT.value[0]] = data[ArticleFeature.SENTIMENT.value[1]]
 		self.y = data['y']
 		self.tfidf.vocabulary = data['tfidf']['vocabulary']
 		self.tfidf.word_index = data['tfidf']['word_index']
@@ -45,10 +45,10 @@ class FeatureManager(object):
 				"word_index": self.tfidf.word_index
 			},
 			"feature_manager": {
-				ArticleFeature.TOPIC(1): self.x[ArticleFeature.TOPIC[0]],
-				ArticleFeature.ORIGIN(1): self.x[ArticleFeature.ORIGIN[0]],
-				ArticleFeature.WRITER(1): self.x[ArticleFeature.WRITER[0]],
-				ArticleFeature.SENTIMENT(1): self.x[ArticleFeature.SENTIMENT[0]],
+				ArticleFeature.TOPIC.value[1]: self.x[ArticleFeature.TOPIC[0]],
+				ArticleFeature.ORIGIN.value[1]: self.x[ArticleFeature.ORIGIN.value[0]],
+				ArticleFeature.AUTHOR.value[1]: self.x[ArticleFeature.AUTHOR.value[0]],
+				ArticleFeature.SENTIMENT.value[1]: self.x[ArticleFeature.SENTIMENT.value[0]],
 				"y": self.y
 			}
 		}
@@ -58,7 +58,7 @@ class FeatureManager(object):
 class ArticleFeature(Enum):
 	TOPIC = (0, "topic")
 	ORIGIN = (1, "origin")
-	WRITER = (2, "author")
+	AUTHOR = (2, "author")
 	SENTIMENT = (3, "sentiment")
 	TFIDF = (4, "tfidf")
 

@@ -1,6 +1,6 @@
 import uuid
 from recommender.persistence.PickleDS import PickleDS
-from recommender.pipeline import Pipeline
+from recommender.Recommender import Pipeline
 
 __author__ = 'Stretchhog'
 
