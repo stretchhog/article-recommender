@@ -10,21 +10,21 @@ __author__ = 'Stretchhog'
 class Pipeline(object):
 	def __init__(self, ds):
 		self.feature_manager = FeatureManager()
-		self.ensemble = Ensemble(Mode.GLOBAL_AVG, [NaiveBayes(), SupportVectorMachines()])
+		self.ensemble = Ensemble(Mode.GLOBAL_AVG, [NaiveBayes()])
 		self.document_cache = []
 		self.ds = ds
 		self.restore("foo")
 
 	def score(self, document):
-		features = self.feature_manager.tfidf.single_doc_tfidf(document)
-		return self.ensemble.score(features)
+		sample = self.feature_manager.get_document_data(document)
+		return self.ensemble.score(sample)
 
 	def train(self, document, label):
 		self.document_cache.append((document, label))
 		if len(self.document_cache) >= 2:
 			for doc, label in self.document_cache:
 				self.update_knowledge(doc, label)
-			x, y = self.feature_manager.get_data()
+			x, y = self.feature_manager.get_training_data()
 			self.ensemble.train(x, y)
 			self.persist()
 
@@ -39,7 +39,7 @@ class Pipeline(object):
 	def restore(self, name):
 		data = self.ds.load(name)
 		if data is not None:
-			self.feature_manager.restore(data['feature_manager'])
+			self.feature_manager.restore(data)
 
 
 data1 = {
@@ -77,6 +77,11 @@ pipeline = Pipeline(PickleDS())
 pipeline.train(data1, False)
 pipeline.train(data2, True)
 
-text3 = "woman in belgium is the first in the world to give birth to a baby using transplanted ovarian tissue frozen"
-score = pipeline.score(text3)
+score1 = {
+	"topic": "news",
+	"origin": "bcc.co.uk",
+	"author": "People",
+	"article": """woman in belgium is the first in the world to give birth to a baby using transplanted ovarian tissue frozen"""
+}
+score = pipeline.score(score1)
 print(score)

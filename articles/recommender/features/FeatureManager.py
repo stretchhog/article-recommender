@@ -22,18 +22,28 @@ class FeatureManager(object):
 		self.tfidf.update_tfidf(document)
 		self.y = np.hstack((self.y, label))
 
-	def get_data(self):
+	def get_training_data(self):
 		self.gather_features()
 		return self.x, self.y
+
+	def get_document_data(self, data):
+		features = [[], [], [], [], []]
+		features[ArticleFeature.TOPIC.value[0]] = data[ArticleFeature.TOPIC.value[1]]
+		features[ArticleFeature.ORIGIN.value[0]] = data[ArticleFeature.ORIGIN.value[1]]
+		features[ArticleFeature.AUTHOR.value[0]] = data[ArticleFeature.AUTHOR.value[1]]
+		document = data['article']
+		features[ArticleFeature.SENTIMENT.value[0]] = self.sentiment.get_sentiment(document)
+		features[ArticleFeature.TFIDF.value[0]] = self.tfidf.single_doc_tfidf(document)
+		return features
 
 	def gather_features(self):
 		self.x[ArticleFeature.TFIDF.value[0]] = self.tfidf.get_tfidf()
 
 	def restore(self, data):
-		self.x[ArticleFeature.TOPIC.value[0]] = data[ArticleFeature.TOPIC.value[1]]
-		self.x[ArticleFeature.ORIGIN.value[0]] = data[ArticleFeature.ORIGIN.value[1]]
-		self.x[ArticleFeature.AUTHOR.value[0]] = data[ArticleFeature.AUTHOR.value[1]]
-		self.x[ArticleFeature.SENTIMENT.value[0]] = data[ArticleFeature.SENTIMENT.value[1]]
+		self.x[ArticleFeature.TOPIC.value[0]] = data['feature_manager'][ArticleFeature.TOPIC.value[1]]
+		self.x[ArticleFeature.ORIGIN.value[0]] = data['feature_manager'][ArticleFeature.ORIGIN.value[1]]
+		self.x[ArticleFeature.AUTHOR.value[0]] = data['feature_manager'][ArticleFeature.AUTHOR.value[1]]
+		self.x[ArticleFeature.SENTIMENT.value[0]] = data['feature_manager'][ArticleFeature.SENTIMENT.value[1]]
 		self.y = data['y']
 		self.tfidf.vocabulary = data['tfidf']['vocabulary']
 		self.tfidf.word_index = data['tfidf']['word_index']
@@ -45,12 +55,12 @@ class FeatureManager(object):
 				"word_index": self.tfidf.word_index
 			},
 			"feature_manager": {
-				ArticleFeature.TOPIC.value[1]: self.x[ArticleFeature.TOPIC[0]],
+				ArticleFeature.TOPIC.value[1]: self.x[ArticleFeature.TOPIC.value[0]],
 				ArticleFeature.ORIGIN.value[1]: self.x[ArticleFeature.ORIGIN.value[0]],
 				ArticleFeature.AUTHOR.value[1]: self.x[ArticleFeature.AUTHOR.value[0]],
 				ArticleFeature.SENTIMENT.value[1]: self.x[ArticleFeature.SENTIMENT.value[0]],
-				"y": self.y
-			}
+			},
+			"y": self.y
 		}
 		return data
 
