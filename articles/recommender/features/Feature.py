@@ -1,5 +1,6 @@
 import abc
 import numpy as np
+from recommender.feature_extraction.TFIDF import TFIDF
 
 __author__ = 'Stretchhog'
 
