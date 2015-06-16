@@ -13,7 +13,7 @@ class NaiveBayes(Model):
 		self.x = []
 
 	def train(self, x, y):
-		self.bins = self.__bin_x(x, y)
+		self.bins = [f.get_train_for_nb() for f in x]
 		self.y = y
 		self.x = x
 
@@ -44,33 +44,17 @@ class NaiveBayes(Model):
 					bin[value]['-'] = 1
 		return bin
 
-	def score(self, x):
+	def score(self, doc, x):
 		prob_neg, prob_pos = self.__get_priors()
 
-		pos, neg = self.__get_probs_for_categoric(self.bins[ArticleFeature.ORIGIN.value[0]], x[ArticleFeature.ORIGIN.value[0]])
-		prob_pos *= self.__ratio(pos, neg)
-		prob_neg *= self.__ratio(neg, pos)
+		pos = []
+		neg = []
+		for i in range(0, len(doc)):
+			_pos, _neg = x[i].get_score_for_nb(doc[i], self.bins[i])
+			if _pos is not None and _neg is not None:
+				pos.append(_pos)
+				neg.append(_neg)
 
-		pos, neg = self.__get_probs_for_categoric(self.bins[ArticleFeature.AUTHOR.value[0]], x[ArticleFeature.AUTHOR.value[0]])
-		prob_pos *= self.__ratio(pos, neg)
-		prob_neg *= self.__ratio(neg, pos)
-
-		pos, neg = self.__get_probs_for_categoric(self.bins[ArticleFeature.TOPIC.value[0]], x[ArticleFeature.TOPIC.value[0]])
-		prob_pos *= self.__ratio(pos, neg)
-		prob_neg *= self.__ratio(neg, pos)
-
-		sentiment_index = ArticleFeature.SENTIMENT.value[0]
-		pos, neg = self.__get_probs_for_numeric(self.bins[sentiment_index], x[sentiment_index], self.x[sentiment_index])
-		prob_pos *= self.__ratio(pos, neg)
-		prob_neg *= self.__ratio(neg, pos)
-
-		for i in range(1, x.shape[1]):
-			if x[0, i] == 0.:
-				continue
-			index = np.searchsorted(self.data_cache[i][0], x[0, i])
-			pos, neg = self.__labels_for_range(self.x[:, i], self.data_cache[i][1][index], self.data_cache[i][1][index + 1] if index < len(self.data_cache[i][1]) else None)
-			prob_pos *= pos / (pos + neg)
-			prob_neg *= neg / (pos + neg)
 
 		return prob_pos / (prob_neg + prob_pos)
 
@@ -89,15 +73,6 @@ class NaiveBayes(Model):
 		pos = np.count_nonzero(self.y[documents_in_range])
 		neg = data.shape[0] - pos
 		return pos, neg
-
-	def __get_probs_for_categoric(self, bins, value):
-		if value not in bins:
-			return None, None
-		return bins[value]['+'], bins[value]['-']
-
-	def __get_probs_for_numeric(self, bins, value, x):
-		index = np.searchsorted(bins[1], value)
-		pos, neg = self.__labels_for_range(x, bins[1][index], bins[1][index + 1] if index < len(bins[1]) else None)
 
 	def __ratio(self, x, y):
 		if x is not None and y is not None:

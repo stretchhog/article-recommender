@@ -55,7 +55,7 @@ class CategoricFeature(Feature):
 		return bins
 
 	def get_score_for_nb(self, value, bins):
-		if value not in bin:
+		if value not in bins:
 			return None, None
 		return bins[value]['+'], bins[value]['-']
 
@@ -77,12 +77,13 @@ class CategoricFeature(Feature):
 
 class NumericFeature(Feature):
 	def __init__(self, feature_manager):
-		self.values = np.zeros((1, 1))
+		self.values = np.zeros(0)
 		self.feature_manager = feature_manager
 
 	def update(self, value):
-		if self.values.shape == (1, 1):
-			self.values = value
+		if self.values.shape == (0,):
+			self.values = np.zeros(1)
+			self.values[0] = value
 		else:
 			self.values = np.vstack((self.values, value))
 
@@ -131,7 +132,7 @@ class TFIDFFeature(Feature):
 			if values[0, i] == 0.:
 				continue
 			index = np.searchsorted(bins[i][0], values[0, i])
-			_pos, _neg = labels_for_range(self.tfidf.get_tfidf()[:, i], self.feature_manager.y,
+			_pos, _neg = labels_for_range(values[:, i], self.feature_manager.y,
 			                              bins[i][1][index], bins[i][1][index + 1] if index < len(bins[i][1]) else None)
 			pos.append(_pos)
 			neg.append(_neg)

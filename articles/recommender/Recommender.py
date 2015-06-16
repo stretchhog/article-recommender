@@ -10,23 +10,22 @@ __author__ = 'Stretchhog'
 class Pipeline(object):
 	def __init__(self, ds):
 		self.feature_manager = FeatureManager()
-		self.ensemble = Ensemble(Mode.GLOBAL_AVG, [NaiveBayes()])
+		self.ensemble = Ensemble(Mode.GLOBAL_AVG, [NaiveBayes(), SupportVectorMachines()])
 		self.document_cache = []
 		self.ds = ds
 		self.restore("foo")
 
 	def score(self, document):
-		sample = self.feature_manager.get_document_data(document)
-		return self.ensemble.score(sample)
+		doc, x = self.feature_manager.get_document_data(document)
+		return self.ensemble.score(doc, x)
 
 	def train(self, document, label):
 		self.document_cache.append((document, label))
 		if len(self.document_cache) >= 2:
 			for doc, label in self.document_cache:
 				self.update_knowledge(doc, label)
-			x, y = self.feature_manager.get_training_data()
-			self.ensemble.train(x, y)
-			self.persist()
+			self.ensemble.train(self.feature_manager.x, self.feature_manager.y)
+			# self.persist()
 
 	def update_knowledge(self, doc, label):
 		self.feature_manager.add_document(doc, label)
@@ -78,7 +77,7 @@ pipeline.train(data1, False)
 pipeline.train(data2, True)
 
 score1 = {
-	"topic": "news",
+	"topic": "entertainment",
 	"origin": "bcc.co.uk",
 	"author": "People",
 	"article": """woman in belgium is the first in the world to give birth to a baby using transplanted ovarian tissue frozen"""

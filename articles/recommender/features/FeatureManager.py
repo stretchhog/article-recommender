@@ -10,13 +10,13 @@ __author__ = 'tvancann'
 class FeatureManager(object):
 	def __init__(self):
 		self.tfidf = TFIDF()
-		self.x = [[CategoricFeature(self)],
-		          [CategoricFeature(self)],
-		          [CategoricFeature(self)],
-		          [NumericFeature(self)],
-		          [TFIDFFeature(self, self.tfidf)]]
+		self.x = [CategoricFeature(self),
+		          CategoricFeature(self),
+		          CategoricFeature(self),
+		          NumericFeature(self),
+		          TFIDFFeature(self, self.tfidf)]
 		self.sentiment = Sentiment()
-		self.y = []
+		self.y = np.zeros((0, 1))
 
 	def add_document(self, data, label):
 		self.x[ArticleFeature.TOPIC.value[0]].update(data[ArticleFeature.TOPIC.value[1]])
@@ -26,7 +26,20 @@ class FeatureManager(object):
 		self.x[ArticleFeature.SENTIMENT.value[0]].update(self.sentiment.get_sentiment(document))
 		self.x[ArticleFeature.TFIDF.value[0]].update(document)
 
-		self.y = np.hstack((self.y, label))
+		if self.y.shape is (0, 0):
+			self.y = np.array(label)
+		else:
+			self.y = np.vstack((self.y, label))
+
+	def get_document_data(self, data):
+		features = [[], [], [], [], []]
+		features[ArticleFeature.TOPIC.value[0]] = data[ArticleFeature.TOPIC.value[1]]
+		features[ArticleFeature.ORIGIN.value[0]] = data[ArticleFeature.ORIGIN.value[1]]
+		features[ArticleFeature.AUTHOR.value[0]] = data[ArticleFeature.AUTHOR.value[1]]
+		document = data['article']
+		features[ArticleFeature.SENTIMENT.value[0]] = self.sentiment.get_sentiment(document)
+		features[ArticleFeature.TFIDF.value[0]] = self.tfidf.single_doc_tfidf(document)
+		return features, self.x
 
 	def restore(self, data):
 		self.x[ArticleFeature.TOPIC.value[0]] = data['feature_manager'][ArticleFeature.TOPIC.value[1]]

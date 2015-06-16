@@ -21,10 +21,10 @@ class Ensemble(Model):
 		for model in self.models:
 			model.train(x, y)
 
-	def score(self, x):
+	def score(self, doc, x):
 		scores = []
 		for model in self.models:
-			scores.append(model.score(x))
+			scores.append(model.score(doc, x))
 
 		likelihood = 0
 		if self.mode is Mode.MAJORITY_AVG:

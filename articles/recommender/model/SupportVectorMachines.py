@@ -1,3 +1,5 @@
+from itertools import chain
+import numpy as np
 from sklearn import svm
 
 from recommender.model.Model import Model
@@ -13,7 +15,11 @@ class SupportVectorMachines(Model):
 		return self.model.predict_proba(x)[0][0]
 
 	def train(self, x, y):
-		self.model = self.model.fit(x, y)
+		all_features = [feature.get_train_for_svm() for feature in x]
+		concat = np.concatenate((all_features[0], all_features[1]), axis=1)
+		for i in range(2, len(all_features)):
+			concat = np.concatenate((concat, all_features[i]), axis=1)
+		self.model = self.model.fit(concat, y)
 
 	def get_type(self):
 		return "SVM"
