@@ -1,4 +1,4 @@
-from recommender.Recommender import Pipeline
+from recommender.Predictors import DocumentPredictor
 from recommender.persistence.PickleDS import PickleDS
 
 __author__ = 'Stretchhog'
@@ -12,7 +12,7 @@ def read_score_data():
 	pass
 
 
-pipeline = Pipeline(PickleDS())
+pipeline = DocumentPredictor(PickleDS())
 
 train_data = read_train_data()
 for d, label in train_data:
