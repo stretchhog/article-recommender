@@ -45,7 +45,7 @@ data1 = {
 	"topic": "news",
 	"origin": "bcc.co.uk",
 	"author": "Dan foo",
-	"article": """The remains of 44 victims of the Germanwings plane crash have arrived in Duesseldorf, where they will be returned to families for burial.
+	"article": """The woman remains of 44 victims of the Germanwings plane crash have arrived in Duesseldorf, where they will be returned to families for burial.
 Lufthansa sent the coffins by cargo plane on Tuesday night from Marseille.
 Elmar Giemulla, a lawyer for some of the families, said the arrival of the remains would give relatives "closure".
 Co-pilot Andreas Lubitz is believed to have intentionally flown the Airbus A320 into the French Alps in March, killing 150 people.
@@ -79,7 +79,7 @@ pipeline.train(data2, True)
 score1 = {
 	"topic": "entertainment",
 	"origin": "bcc.co.uk",
-	"author": "People",
+	"author": "Dan foo",
 	"article": """woman in belgium is the first in the world to give birth to a baby using transplanted ovarian tissue frozen"""
 }
 score = pipeline.score(score1)

@@ -8,5 +8,5 @@ class Model(object):
 		return
 
 	@abc.abstractmethod
-	def score(self, x):
+	def score(self, doc, x):
 		return

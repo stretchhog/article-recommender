@@ -56,8 +56,8 @@ class CategoricFeature(Feature):
 
 	def get_score_for_nb(self, value, bins):
 		if value not in bins:
-			return None, None
-		return bins[value]['+'], bins[value]['-']
+			return [0], [0]
+		return [bins[value]['+']], [bins[value]['-']]
 
 	def get_train_for_svm(self):
 		self.uniques = list(set(self.values))
@@ -92,25 +92,28 @@ class NumericFeature(Feature):
 
 	def get_score_for_nb(self, value, bins):
 		index = np.searchsorted(bins[1], value)
-		pos, neg = labels_for_range(self.values, self.feature_manager.y, bins[1][index],
-		                            bins[1][index + 1] if index < len(bins[1]) else None)
-		return pos, neg
+		pos, neg = labels_for_range(self.values, self.feature_manager.y, bins[1][index - 1] if index != 0 else None,
+		                            bins[1][index])
+		return [pos], [neg]
 
 	def get_train_for_svm(self):
 		return self.values
 
 	def get_score_for_svm(self, value):
-		return value
+		empty = np.zeros((1, 1))
+		empty[0][0] = value
+		return empty
 
 
 def labels_for_range(x, y, lo, hi):
-	if hi is not None:
-		documents_in_range = np.logical_and(lo < x, x <= hi)
+	if lo is not None:
+		doc_in_bin = np.logical_and(lo < x, x <= hi)
 	else:
-		documents_in_range = lo < x
+		doc_in_bin = x <= hi
 
-	pos = np.count_nonzero(y[documents_in_range])
-	neg = x.shape[0] - pos
+	label_in_bin = y[doc_in_bin]
+	pos = np.count_nonzero(label_in_bin)
+	neg = len(label_in_bin) - pos
 	return pos, neg
 
 
@@ -128,12 +131,13 @@ class TFIDFFeature(Feature):
 	def get_score_for_nb(self, values, bins):
 		pos = []
 		neg = []
+		features = self.tfidf.get_tfidf()
 		for i in range(1, values.shape[1]):
 			if values[0, i] == 0.:
 				continue
-			index = np.searchsorted(bins[i][0], values[0, i])
-			_pos, _neg = labels_for_range(values[:, i], self.feature_manager.y,
-			                              bins[i][1][index], bins[i][1][index + 1] if index < len(bins[i][1]) else None)
+			index = np.searchsorted(bins[i][1], values[0, i])
+			_pos, _neg = labels_for_range(features[:, i], self.feature_manager.y,
+			                              bins[i][1][index - 1], bins[i][1][index] if index < len(bins[i][1]) else None)
 			pos.append(_pos)
 			neg.append(_neg)
 		return pos, neg
@@ -141,5 +145,5 @@ class TFIDFFeature(Feature):
 	def get_train_for_svm(self):
 		return self.tfidf.get_tfidf()
 
-	def get_score_for_svm(self, document):
-		return self.tfidf.single_doc_tfidf(document)
+	def get_score_for_svm(self, values):
+		return values

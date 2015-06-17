@@ -11,8 +11,12 @@ class SupportVectorMachines(Model):
 	def __init__(self):
 		self.model = svm.SVC(kernel='linear', probability=True)
 
-	def score(self, x):
-		return self.model.predict_proba(x)[0][0]
+	def score(self, doc, x):
+		all_features = [feature.get_score_for_svm(value) for feature, value in zip(x, doc)]
+		concat = np.concatenate((all_features[0], all_features[1]), axis=1)
+		for i in range(2, len(all_features)):
+			concat = np.concatenate((concat, all_features[i]), axis=1)
+		return self.model.predict_proba(concat)[0][0]
 
 	def train(self, x, y):
 		all_features = [feature.get_train_for_svm() for feature in x]
