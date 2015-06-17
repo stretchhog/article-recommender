@@ -13,19 +13,9 @@ class NaiveBayes(Model):
 		self.x = []
 
 	def train(self, x, y):
-		self.bins = [f.get_train_for_nb() for f in x]
+		self.bins = [f.get_train_for_nb(y) for f in x]
 		self.y = y
 		self.x = x
-
-	def __bin_x(self, x, y):
-		bins = [[], [], [], [], []]
-		bins[ArticleFeature.TOPIC.value[0]] = self.__bin_categoric_feature(x[ArticleFeature.TOPIC.value[0]], y)
-		bins[ArticleFeature.ORIGIN.value[0]] = self.__bin_categoric_feature(x[ArticleFeature.ORIGIN.value[0]], y)
-		bins[ArticleFeature.AUTHOR.value[0]] = self.__bin_categoric_feature(x[ArticleFeature.AUTHOR.value[0]], y)
-		bins[ArticleFeature.SENTIMENT.value[0]] = np.histogram(x[ArticleFeature.SENTIMENT.value[0]], 100)
-		bins[ArticleFeature.TFIDF.value[0]] = [np.histogram(column, 100) for column in
-		                                       x[ArticleFeature.TFIDF.value[0]].T]
-		return bins
 
 	def __bin_categoric_feature(self, x, y):
 		bin = {}
@@ -45,13 +35,13 @@ class NaiveBayes(Model):
 					bin[value]['-'] = 1
 		return bin
 
-	def score(self, doc, x):
+	def score(self, doc, x, y=None):
 		prob_neg, prob_pos = self.__get_priors()
 
 		pos = []
 		neg = []
 		for i in range(0, len(doc)):
-			_pos, _neg = x[i].get_score_for_nb(doc[i], self.bins[i])
+			_pos, _neg = x[i].get_score_for_nb(doc[i], self.bins[i], y)
 			pos += _pos
 			neg += _neg
 		for p, n in zip(pos, neg):
@@ -60,7 +50,7 @@ class NaiveBayes(Model):
 		return prob_pos / (prob_neg + prob_pos)
 
 	def __ratio(self, a, b):
-		return a + 1 / (a + b + 2)
+		return (a + 1) / (a + b + 2)
 
 	def __get_priors(self):
 		total = len(self.y)

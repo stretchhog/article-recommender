@@ -10,11 +10,11 @@ __author__ = 'tvancann'
 class FeatureManager(object):
 	def __init__(self):
 		self.tfidf = TFIDF()
-		self.x = [CategoricFeature(self),
-		          CategoricFeature(self),
-		          CategoricFeature(self),
-		          NumericFeature(self),
-		          TFIDFFeature(self, self.tfidf)]
+		self.x = [CategoricFeature(),
+		          CategoricFeature(),
+		          CategoricFeature(),
+		          NumericFeature(),
+		          TFIDFFeature(self.tfidf)]
 		self.sentiment = Sentiment()
 		self.y = np.zeros((0, 1))
 
@@ -39,7 +39,7 @@ class FeatureManager(object):
 		document = data['article']
 		features[ArticleFeature.SENTIMENT.value[0]] = self.sentiment.get_sentiment(document)
 		features[ArticleFeature.TFIDF.value[0]] = self.tfidf.single_doc_tfidf(document)
-		return features, self.x
+		return features, self.x, self.y
 
 	def restore(self, data):
 		self.x[ArticleFeature.TOPIC.value[0]] = data['feature_manager'][ArticleFeature.TOPIC.value[1]]
@@ -49,30 +49,33 @@ class FeatureManager(object):
 		self.y = data['y']
 		self.tfidf.vocabulary = data['tfidf']['vocabulary']
 		self.tfidf.word_index = data['tfidf']['word_index']
+		self.tfidf.features.x = data['tfidf']['x']
+		self.tfidf.features.first_row = False
 
 	def get_for_persistence(self):
 		data = {
-			"tfidf": {
-				"vocabulary": self.tfidf.vocabulary,
-				"word_index": self.tfidf.word_index
+			'tfidf': {
+				'vocabulary': self.tfidf.vocabulary,
+				'word_index': self.tfidf.word_index,
+				'x': self.tfidf.features.x
 			},
-			"feature_manager": {
+			'feature_manager': {
 				ArticleFeature.TOPIC.value[1]: self.x[ArticleFeature.TOPIC.value[0]],
 				ArticleFeature.ORIGIN.value[1]: self.x[ArticleFeature.ORIGIN.value[0]],
 				ArticleFeature.AUTHOR.value[1]: self.x[ArticleFeature.AUTHOR.value[0]],
 				ArticleFeature.SENTIMENT.value[1]: self.x[ArticleFeature.SENTIMENT.value[0]],
 			},
-			"y": self.y
+			'y': self.y
 		}
 		return data
 
 
 class ArticleFeature(Enum):
-	TOPIC = (0, "topic")
-	ORIGIN = (1, "origin")
-	AUTHOR = (2, "author")
-	SENTIMENT = (3, "sentiment")
-	TFIDF = (4, "tfidf")
+	TOPIC = (0, 'topic')
+	ORIGIN = (1, 'origin')
+	AUTHOR = (2, 'author')
+	SENTIMENT = (3, 'sentiment')
+	TFIDF = (4, 'tfidf')
 
 
 class UserFeatureName(Enum):

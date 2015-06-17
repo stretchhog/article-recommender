@@ -11,11 +11,11 @@ class Feature(object):
 		return
 
 	@abc.abstractmethod
-	def get_train_for_nb(self):
+	def get_train_for_nb(self, y=None):
 		return
 
 	@abc.abstractmethod
-	def get_score_for_nb(self, value, bins):
+	def get_score_for_nb(self, value, bins, y=None):
 		return
 
 	@abc.abstractmethod
@@ -28,17 +28,16 @@ class Feature(object):
 
 
 class CategoricFeature(Feature):
-	def __init__(self, feature_manager):
+	def __init__(self):
 		self.values = []
-		self.feature_manager = feature_manager
 		self.uniques = []
 
 	def update(self, value):
 		self.values.append(value)
 
-	def get_train_for_nb(self):
+	def get_train_for_nb(self, y=None):
 		bins = {}
-		for value, label in zip(self.values, self.feature_manager.y):
+		for value, label in zip(self.values, y):
 			if value in bins:
 				if label:
 					bins[value]['+'] += 1
@@ -54,7 +53,7 @@ class CategoricFeature(Feature):
 					bins[value]['-'] = 1
 		return bins
 
-	def get_score_for_nb(self, value, bins):
+	def get_score_for_nb(self, value, bins, y=None):
 		if value not in bins:
 			return [0], [0]
 		return [bins[value]['+']], [bins[value]['-']]
@@ -76,9 +75,8 @@ class CategoricFeature(Feature):
 
 
 class NumericFeature(Feature):
-	def __init__(self, feature_manager):
+	def __init__(self):
 		self.values = np.zeros(0)
-		self.feature_manager = feature_manager
 
 	def update(self, value):
 		if self.values.shape == (0,):
@@ -87,13 +85,12 @@ class NumericFeature(Feature):
 		else:
 			self.values = np.vstack((self.values, value))
 
-	def get_train_for_nb(self):
+	def get_train_for_nb(self, y=None):
 		return np.histogram(self.values, 100)
 
-	def get_score_for_nb(self, value, bins):
+	def get_score_for_nb(self, value, bins, y=None):
 		index = np.searchsorted(bins[1], value)
-		pos, neg = labels_for_range(self.values, self.feature_manager.y, bins[1][index - 1] if index != 0 else None,
-		                            bins[1][index])
+		pos, neg = labels_for_range(self.values, y, bins[1][index - 1] if index != 0 else None, bins[1][index])
 		return [pos], [neg]
 
 	def get_train_for_svm(self):
@@ -118,17 +115,16 @@ def labels_for_range(x, y, lo, hi):
 
 
 class TFIDFFeature(Feature):
-	def __init__(self, feature_manager, tfidf):
-		self.feature_manager = feature_manager
+	def __init__(self, tfidf):
 		self.tfidf = tfidf
 
 	def update(self, document):
 		self.tfidf.update_tfidf(document)
 
-	def get_train_for_nb(self):
+	def get_train_for_nb(self, y=None):
 		return [np.histogram(column, 100) for column in self.tfidf.features.x.T]
 
-	def get_score_for_nb(self, values, bins):
+	def get_score_for_nb(self, values, bins, y=None):
 		pos = []
 		neg = []
 		features = self.tfidf.get_tfidf()
@@ -136,8 +132,8 @@ class TFIDFFeature(Feature):
 			if values[0, i] == 0.:
 				continue
 			index = np.searchsorted(bins[i][1], values[0, i])
-			_pos, _neg = labels_for_range(features[:, i], self.feature_manager.y,
-			                              bins[i][1][index - 1], bins[i][1][index] if index < len(bins[i][1]) else None)
+			_pos, _neg = labels_for_range(features[:, i], y, bins[i][1][index - 1],
+			                              bins[i][1][index] if index < len(bins[i][1]) else None)
 			pos.append(_pos)
 			neg.append(_neg)
 		return pos, neg

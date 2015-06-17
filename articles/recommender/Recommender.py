@@ -16,8 +16,8 @@ class Pipeline(object):
 		self.restore("foo")
 
 	def score(self, document):
-		doc, x = self.feature_manager.get_document_data(document)
-		return self.ensemble.score(doc, x)
+		doc, x, y = self.feature_manager.get_document_data(document)
+		return self.ensemble.score(doc, x, y)
 
 	def train(self, document, label):
 		self.document_cache.append((document, label))
@@ -25,7 +25,7 @@ class Pipeline(object):
 			for doc, label in self.document_cache:
 				self.update_knowledge(doc, label)
 			self.ensemble.train(self.feature_manager.x, self.feature_manager.y)
-			# self.persist()
+			self.persist()
 
 	def update_knowledge(self, doc, label):
 		self.feature_manager.add_document(doc, label)

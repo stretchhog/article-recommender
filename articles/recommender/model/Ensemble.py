@@ -21,10 +21,10 @@ class Ensemble(Model):
 		for model in self.models:
 			model.train(x, y)
 
-	def score(self, doc, x):
+	def score(self, doc, x, y=None):
 		scores = []
 		for model in self.models:
-			scores.append(model.score(doc, x))
+			scores.append(model.score(doc, x, y))
 
 		likelihood = 0
 		if self.mode is Mode.MAJORITY_AVG:
@@ -32,11 +32,6 @@ class Ensemble(Model):
 		elif self.mode is Mode.GLOBAL_AVG:
 			likelihood = sum(scores) / len(scores)
 		return likelihood
-
-	def persist(self):
-		for model in self.models:
-			mid = self.db.save_model(model)
-			print(mid)
 
 
 class Mode(Enum):

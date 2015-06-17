@@ -11,7 +11,7 @@ class SupportVectorMachines(Model):
 	def __init__(self):
 		self.model = svm.SVC(kernel='linear', probability=True)
 
-	def score(self, doc, x):
+	def score(self, doc, x, y=None):
 		all_features = [feature.get_score_for_svm(value) for feature, value in zip(x, doc)]
 		concat = np.concatenate((all_features[0], all_features[1]), axis=1)
 		for i in range(2, len(all_features)):

@@ -23,7 +23,7 @@ class TFIDF(object):
 
 	def single_doc_tfidf(self, document):
 		tokens = self.tokenizer.tokenize(document)
-		tf = self.__create_document_vector(tokens)
+		tf = self.__create_document_vector(tokens) / len(tokens)
 		idf = self.__calculate_idf(self.features.x)
 		return np.multiply(tf, idf)
 
