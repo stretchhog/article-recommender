@@ -16,3 +16,4 @@ paste
 # persistence
 pymongo
 mongoengine
+beaker

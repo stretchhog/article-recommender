@@ -1,10 +1,34 @@
+import numpy as np
+from sklearn.cluster import KMeans
+from sklearn.neighbors import KNeighborsClassifier
 from recommender.features.FeatureManager import FeatureManager
 from recommender.model.Ensemble import Ensemble, Mode
 from recommender.model.NaiveBayes import NaiveBayes
 from recommender.model.SupportVectorMachines import SupportVectorMachines
 from recommender.persistence.PickleDS import PickleDS
+import matplotlib.pyplot as plt
 
 __author__ = 'Stretchhog'
+
+
+class Predictor(object):
+	def __init__(self, user_id):
+		self.user_id = user_id
+
+		self.document_model = DocumentPredictor(PickleDS())
+		self.user_model = UserPredictor()
+		self.rating_model = RatingPredictor()
+
+	def predict(self, user_features, document_features):
+		doc_likelihood = self.document_model.score(document_features)
+		user_likihood = self.user_model.score(user_features)
+		rating = self.rating_model.score(doc_likelihood, user_likihood)
+		return rating
+
+	def feedback(self, doc_features, user_features, rating, label):
+		self.document_model.update(doc_features, label)
+		self.user_model.update(user_features, label)
+		self.rating_model.update(rating)
 
 
 class DocumentPredictor(object):
@@ -13,29 +37,29 @@ class DocumentPredictor(object):
 		self.ensemble = Ensemble(Mode.GLOBAL_AVG, [NaiveBayes(), SupportVectorMachines()])
 		self.document_cache = []
 		self.ds = ds
-		self.restore("foo")
+		self.__restore("foo")
 
 	def score(self, document):
 		doc, x, y = self.feature_manager.get_document_data(document)
 		return self.ensemble.score(doc, x, y)
 
-	def train(self, document, label):
+	def update(self, document, label):
 		self.document_cache.append((document, label))
 		if len(self.document_cache) >= 2:
 			for doc, label in self.document_cache:
-				self.update_knowledge(doc, label)
+				self.__update_knowledge(doc, label)
 			self.ensemble.train(self.feature_manager.x, self.feature_manager.y)
-			self.persist()
+			self.__persist()
 
-	def update_knowledge(self, doc, label):
+	def __update_knowledge(self, doc, label):
 		self.feature_manager.add_document(doc, label)
 
-	def persist(self):
+	def __persist(self):
 		name = "foo"
 		data = self.feature_manager.get_for_persistence()
 		self.ds.save(name, data)
 
-	def restore(self, name):
+	def __restore(self, name):
 		data = self.ds.load(name)
 		if data is not None:
 			self.feature_manager.restore(data)
@@ -45,7 +69,44 @@ class UserPredictor(object):
 	def __init__(self):
 		pass
 
+	def score(self, user_features):
+		pass
+
+	def update(self, user_features, label):
+		pass
+
 
 class RatingPredictor(object):
 	def __init__(self):
-		pass
+		self.x = np.zeros((0, 2))
+		self.y = np.zeros((0, 1))
+		self.knn = KNeighborsClassifier(n_neighbors=2)
+		self.count = 0
+
+	def score(self, doc_likelihood, user_likihood):
+		return self.knn.predict(np.array([doc_likelihood, user_likihood]))
+
+	def update(self, doc_prob, user_prob, rating):
+		array = np.array([doc_prob, user_prob])
+		self.x = np.vstack((self.x, array))
+		self.y = np.vstack((self.y, rating))
+		self.count += 1
+		if self.count == 5:
+			self.knn.fit(self.x, self.y)
+			self.count = 0
+
+
+p = RatingPredictor()
+
+p.update(0.98, 0.92, 5)
+p.update(0.9, 0.9, 5)
+p.update(0.78, 0.8, 4)
+p.update(0.69, 0.75, 4)
+p.update(0.5, 0.5, 3)
+p.update(0.49, 0.53, 3)
+p.update(0.3, 0.3, 2)
+p.update(0.26, 0.29, 2)
+p.update(0.01, 0.1, 1)
+p.update(0.14, 0.09, 1)
+p.update(0.10, 0.19, 1)
+p.score(0.5, 0.4)
