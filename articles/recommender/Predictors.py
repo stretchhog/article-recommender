@@ -80,20 +80,19 @@ class RatingPredictor(object):
 	def __init__(self):
 		self.x = np.zeros((0, 2))
 		self.y = np.zeros((0, 1))
-		self.knn = KNeighborsClassifier(n_neighbors=2)
+		self.knn = KNeighborsClassifier(n_neighbors=5)
 		self.count = 0
 
-	def score(self, doc_likelihood, user_likihood):
-		return self.knn.predict(np.array([doc_likelihood, user_likihood]))
+	def score(self, doc_likelihood, user_likelihood):
+		weights = self.knn.predict_proba(np.array([doc_likelihood, user_likelihood]))
+		rating = np.sum(self.knn.classes_ * weights)
+		return rating
 
 	def update(self, doc_prob, user_prob, rating):
 		array = np.array([doc_prob, user_prob])
 		self.x = np.vstack((self.x, array))
 		self.y = np.vstack((self.y, rating))
-		self.count += 1
-		if self.count == 5:
-			self.knn.fit(self.x, self.y)
-			self.count = 0
+		self.knn.fit(self.x, self.y.ravel())
 
 
 p = RatingPredictor()
@@ -109,4 +108,4 @@ p.update(0.26, 0.29, 2)
 p.update(0.01, 0.1, 1)
 p.update(0.14, 0.09, 1)
 p.update(0.10, 0.19, 1)
-p.score(0.5, 0.4)
+print('rating:', p.score(0.5, 0.4), 'stars')
