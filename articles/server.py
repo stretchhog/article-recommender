@@ -1,6 +1,6 @@
 __author__ = 'Stretchhog'
 
-from flask import Flask
+from flask import Flask, render_template
 import cherrypy
 from paste.translogger import TransLogger
 
@@ -11,6 +11,11 @@ app.debug = True
 @app.route("/")
 def hello():
 	return "Hello World!"
+
+
+@app.route('/welcome')
+def welcome():
+	return render_template('welcome.html')
 
 
 def run_server():
@@ -24,8 +29,8 @@ def run_server():
 	cherrypy.config.update({
 		'engine.autoreload_on': True,
 		'log.screen': True,
-		'server.socket_port': 5000,
-		'server.socket_host': '0.0.0.0'
+		'server.socket_port': 5050,
+		'server.socket_host': '127.0.0.1'
 	})
 
 	# Start the CherryPy WSGI web server
