@@ -1,23 +1,11 @@
-from recommender.Predictors import DocumentPredictor
-from recommender.persistence.PickleDS import PickleDS
+import pandas as pd
+import numpy as np
 
 __author__ = 'Stretchhog'
 
 
-def read_train_data():
-	pass
-
-
-def read_score_data():
-	pass
-
-
-pipeline = DocumentPredictor(PickleDS())
-
-train_data = read_train_data()
-for d, label in train_data:
-	pipeline.train(d, label)
-
-score_data = read_score_data()
-for d, label in score_data:
-	print(pipeline.score(d))
+def load_data():
+	users = pd.read_table('../../data/ml-1m/users.dat', sep='::', engine='python', header=None, names=['user_id', 'gender', 'age', 'occupation', 'zip'])
+	ratings = pd.read_table('../../data/ml-1m/ratings.dat', sep='::', engine='python', header=None, names=['user_id', 'movie_id', 'rating', 'timestamp'])
+	movies = pd.read_table('../../data/ml-1m/movies.dat', sep='::', engine='python', header=None, names=['movie_id', 'title', 'genres'])
+	return users, ratings, movies

@@ -14,7 +14,7 @@ class LearningService(object):
 		self.predictors = LoadingCache('predictors')
 
 	def predict(self, user_id, doc_id, reading_features):
-		if self.predictors.has_key(user_id):
+		if user_id in self.predictors:
 			predictor = Predictor(user_id)
 			self.predictors[user_id] = predictor
 		else:
@@ -60,3 +60,4 @@ class LoadingCache(Cache):
 		}
 		cache_manager = CacheManager(**parse_cache_config_options(cache_opts))
 		self.cache = cache_manager.get_cache(namespace, type='dbm')
+

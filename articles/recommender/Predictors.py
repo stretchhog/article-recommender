@@ -1,12 +1,10 @@
 import numpy as np
-from sklearn.cluster import KMeans
 from sklearn.neighbors import KNeighborsClassifier
 from recommender.features.FeatureManager import FeatureManager
 from recommender.model.Ensemble import Ensemble, Mode
 from recommender.model.NaiveBayes import NaiveBayes
 from recommender.model.SupportVectorMachines import SupportVectorMachines
 from recommender.persistence.PickleDS import PickleDS
-import matplotlib.pyplot as plt
 
 __author__ = 'Stretchhog'
 
@@ -15,8 +13,8 @@ class Predictor(object):
 	def __init__(self, user_id):
 		self.user_id = user_id
 
-		self.document_model = DocumentPredictor(PickleDS())
-		self.user_model = UserPredictor()
+		self.document_model = ContentPredictor(PickleDS())
+		self.user_model = CollaborativePredictor()
 		self.rating_model = RatingPredictor()
 
 	def predict(self, user_features, document_features):
@@ -31,7 +29,7 @@ class Predictor(object):
 		self.rating_model.update(rating)
 
 
-class DocumentPredictor(object):
+class ContentPredictor(object):
 	def __init__(self, ds):
 		self.feature_manager = FeatureManager()
 		self.ensemble = Ensemble(Mode.GLOBAL_AVG, [NaiveBayes(), SupportVectorMachines()])
@@ -65,7 +63,7 @@ class DocumentPredictor(object):
 			self.feature_manager.restore(data)
 
 
-class UserPredictor(object):
+class CollaborativePredictor(object):
 	def __init__(self):
 		pass
 
