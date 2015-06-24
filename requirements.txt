@@ -18,3 +18,4 @@ paste
 pymongo
 mongoengine
 beaker
+pykka

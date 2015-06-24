@@ -13,19 +13,19 @@ class Predictor(object):
 	def __init__(self, user_id):
 		self.user_id = user_id
 
-		self.document_model = ContentPredictor(PickleDS())
-		self.user_model = CollaborativePredictor()
+		self.content_model = ContentPredictor(PickleDS())
+		self.collaborative_model = CollaborativePredictor()
 		self.rating_model = RatingPredictor()
 
-	def predict(self, user_features, document_features):
-		doc_likelihood = self.document_model.score(document_features)
-		user_likihood = self.user_model.score(user_features)
-		rating = self.rating_model.score(doc_likelihood, user_likihood)
+	def predict(self, collaborative_features, content_features):
+		content_score = self.content_model.score(content_features)
+		collaborative_score = self.collaborative_model.score(collaborative_features)
+		rating = self.rating_model.score(content_score, collaborative_score)
 		return rating
 
 	def feedback(self, doc_features, user_features, rating, label):
-		self.document_model.update(doc_features, label)
-		self.user_model.update(user_features, label)
+		self.content_model.update(doc_features, label)
+		self.collaborative_model.update(user_features, label)
 		self.rating_model.update(rating)
 
 
