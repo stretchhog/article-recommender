@@ -1,6 +1,7 @@
 import uuid
 from beaker.cache import CacheManager, Cache
 from beaker.util import parse_cache_config_options
+from pandas import DataFrame
 from recommender.Predictors import Predictor
 
 __author__ = 'Stretchhog'
@@ -10,8 +11,8 @@ class LearningService(object):
 	def __init__(self):
 		self.predictors = LoadingCache('predictors')
 		self.user_cache = LoadingCache('users')
-		self.document_cache = LoadingCache('documents')
-		self.ratings = LoadingCache('ratings')
+		self.content_cache = LoadingCache('documents')
+		self.ratings = DataFrame()
 		self.prediction_cache = LoadingCache('prediction')
 
 	def predict(self, user_id, doc_id):
@@ -20,34 +21,40 @@ class LearningService(object):
 			return self.prediction_cache.get(key).rating
 
 		predictor = self.__get_predictor(user_id)
-		content_features = self.document_cache.get(doc_id)
+		content_features = self.__get_content_features(doc_id)
 		collaborative_features = self.__get_collaborative_features()
 		rating = predictor.predict(collaborative_features, content_features)
 		self.prediction_cache.put(key, Prediction(rating))
 		return rating
 
 	@staticmethod
-	def __composite_key(doc_id, user_id):
-		return user_id + ',' + doc_id
+	def __composite_key(user_id, doc_id):
+		return str(user_id) + '-' + str(doc_id)
 
-	def save_reading_features(self, doc_id, user_id, reading_features):
+	def save_reading_features(self, user_id, doc_id, reading_features):
 		self.prediction_cache.get(self.__composite_key(doc_id, user_id)).reading_features = reading_features
 
 	def __get_predictor(self, user_id):
 		if user_id in self.predictors:
+			predictor = self.predictors[user_id]
+		else:
 			predictor = Predictor(user_id)
 			self.predictors[user_id] = predictor
-		else:
-			predictor = self.predictors[user_id]
 		return predictor
 
-	def feedback(self, doc_id, user_id, predicted_rating, rating):
-		label = (rating == predicted_rating)
-		self.predictors.get(user_id).feedback(self.document_cache.get(doc_id), self.user_cache.get(user_id), rating, label)
+	def feedback(self, user_id, doc_id, predicted_rating, rating):
+		label = (rating == predicted_ratNoneing)
+		self.predictors.get(user_id).feedback(self.content_cache.get(doc_id), self.user_cache.get(user_id), rating, label)
 		self.ratings.put(user_id, [user_id, doc_id, rating, self.prediction_cache.get(self.__composite_key(doc_id, user_id)).reading_features])
 
 	def __get_collaborative_features(self):
-		return [value for _, value in self.ratings]
+		return self.ratings
+
+	def __get_content_features(self, doc_id):
+		if doc_id in self.content_cache:
+			return self.content_cache.get(doc_id)
+		else:
+			return None
 
 
 class Prediction(object):

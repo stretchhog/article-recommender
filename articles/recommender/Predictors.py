@@ -17,16 +17,17 @@ class Predictor(object):
 		self.collaborative_model = CollaborativePredictor()
 		self.rating_model = RatingPredictor()
 
-	def predict(self, collaborative_features, content_features):
-		content_score = self.content_model.score(content_features)
+	def predict(self, collaborative_features, content_features=None):
+		if content_features is not None:
+			content_score = self.content_model.score(content_features)
 		collaborative_score = self.collaborative_model.score(collaborative_features)
-		rating = self.rating_model.score(content_score, collaborative_score)
-		return rating
+		# rating = self.rating_model.score(content_score, collaborative_score)
+		return collaborative_score
 
-	def feedback(self, doc_features, user_features, rating, label):
-		self.content_model.update(doc_features, label)
-		self.collaborative_model.update(user_features, label)
-		self.rating_model.update(rating)
+	def feedback(self, content_features, collaborative_features, rating, label):
+		self.content_model.update(content_features, label)
+		self.collaborative_model.update(collaborative_features, label)
+		self.rating_model.update(rating, None, None)
 
 
 class ContentPredictor(object):
@@ -91,19 +92,3 @@ class RatingPredictor(object):
 		self.x = np.vstack((self.x, array))
 		self.y = np.vstack((self.y, rating))
 		self.knn.fit(self.x, self.y.ravel())
-
-
-p = RatingPredictor()
-
-p.update(0.98, 0.92, 5)
-p.update(0.9, 0.9, 5)
-p.update(0.78, 0.8, 4)
-p.update(0.69, 0.75, 4)
-p.update(0.5, 0.5, 3)
-p.update(0.49, 0.53, 3)
-p.update(0.3, 0.3, 2)
-p.update(0.26, 0.29, 2)
-p.update(0.01, 0.1, 1)
-p.update(0.14, 0.09, 1)
-p.update(0.10, 0.19, 1)
-print('rating:', p.score(0.5, 0.4), 'stars')
